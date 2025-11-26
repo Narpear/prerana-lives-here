@@ -26,8 +26,8 @@ function initClayParticles() {
         particle.style.top = `${Math.random() * 100}%`;
         
         // Random animation delay and duration
-        particle.style.animationDelay = `${Math.random() * 5}s`;
-        particle.style.animationDuration = `${15 + Math.random() * 10}s`;
+        particle.style.animationDelay = `${Math.random() * 10}s`;
+        particle.style.animationDuration = `${30 + Math.random() * 20}s`;
         
         container.appendChild(particle);
     }
@@ -46,8 +46,8 @@ function initLeaves() {
         leaf.style.left = `${Math.random() * 100}%`;
         
         // Random animation delay and duration
-        leaf.style.animationDelay = `${Math.random() * 10}s`;
-        leaf.style.animationDuration = `${10 + Math.random() * 10}s`;
+        leaf.style.animationDelay = `${Math.random() * 20}s`;
+        leaf.style.animationDuration = `${20 + Math.random() * 20}s`;
         
         // Random starting position (start above viewport)
         leaf.style.top = `-${Math.random() * 200}px`;
@@ -80,7 +80,7 @@ function initScrollAnimations() {
     animatedElements.forEach(el => {
         el.style.opacity = '0';
         el.style.transform = 'translateY(30px)';
-        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        el.style.transition = 'opacity 1.2s ease, transform 1.2s ease';
         observer.observe(el);
     });
 }
@@ -201,7 +201,7 @@ function typeWriter(element, text, speed = 50) {
 }
 
 // Add counter animation for scores
-function animateCounter(element, target, duration = 2000) {
+function animateCounter(element, target, callback, duration = 4000) {
     const start = 0;
     const increment = target / (duration / 16);
     let current = start;
@@ -209,8 +209,9 @@ function animateCounter(element, target, duration = 2000) {
     const timer = setInterval(() => {
         current += increment;
         if (current >= target) {
-            element.textContent = target;
+            element.textContent = Math.round(target);
             clearInterval(timer);
+            if (callback) callback();
         } else {
             element.textContent = Math.floor(current);
         }
@@ -221,27 +222,80 @@ function animateCounter(element, target, duration = 2000) {
 const scoreObserver = new IntersectionObserver(function(entries) {
     entries.forEach(entry => {
         if (entry.isIntersecting && !entry.target.dataset.animated) {
-            const value = entry.target.textContent;
-            const numericValue = parseInt(value.replace(/[^0-9]/g, ''));
+            const originalValue = entry.target.dataset.originalValue || entry.target.textContent.trim();
+            entry.target.dataset.animated = 'true';
             
-            if (numericValue) {
-                entry.target.dataset.animated = 'true';
-                animateCounter(entry.target, numericValue);
-                
-                // Add the suffix back after animation
-                setTimeout(() => {
-                    if (value.includes('%')) {
-                        entry.target.textContent = numericValue + '%';
-                    }
-                }, 2000);
+            // Handle different score formats
+            // Check if it's a GPA format (e.g., "9.33/10")
+            if (originalValue.includes('/')) {
+                // Extract the decimal number before the slash
+                const gpaMatch = originalValue.match(/(\d+\.?\d*)\s*\/\s*(\d+)/);
+                if (gpaMatch) {
+                    const gpaValue = parseFloat(gpaMatch[1]);
+                    const denominator = gpaMatch[2];
+                    
+                    // Animate the decimal value
+                    animateDecimalCounter(entry.target, gpaValue, () => {
+                        entry.target.textContent = gpaValue.toFixed(2) + '/' + denominator;
+                    });
+                } else {
+                    // Just display as-is if we can't parse
+                    entry.target.textContent = originalValue;
+                }
+            } 
+            // Check if it's a percentage
+            else if (originalValue.includes('%')) {
+                const numericValue = parseFloat(originalValue.replace(/[^0-9.]/g, ''));
+                if (numericValue) {
+                    animateCounter(entry.target, numericValue, () => {
+                        entry.target.textContent = Math.round(numericValue) + '%';
+                    });
+                }
+            }
+            // Regular integer scores (like GRE, TOEFL)
+            else {
+                const numericValue = parseFloat(originalValue.replace(/[^0-9.]/g, ''));
+                if (numericValue && numericValue % 1 === 0) {
+                    animateCounter(entry.target, numericValue);
+                } else if (numericValue) {
+                    // Handle decimal values
+                    animateDecimalCounter(entry.target, numericValue);
+                }
             }
         }
     });
 }, { threshold: 0.5 });
 
+// Animate decimal counter
+function animateDecimalCounter(element, target, callback) {
+    const start = 0;
+    const duration = 4000;
+    const increment = target / (duration / 16);
+    let current = start;
+    
+    const timer = setInterval(() => {
+        current += increment;
+        if (current >= target) {
+            element.textContent = target.toFixed(2);
+            clearInterval(timer);
+            if (callback) callback();
+        } else {
+            element.textContent = current.toFixed(2);
+        }
+    }, 16);
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const scoreValues = document.querySelectorAll('.score-value');
-    scoreValues.forEach(score => scoreObserver.observe(score));
+    scoreValues.forEach(score => {
+        // If it has a data-gpa attribute, preserve the original format
+        if (score.dataset.gpa) {
+            score.dataset.originalValue = score.dataset.gpa;
+        } else {
+            score.dataset.originalValue = score.textContent.trim();
+        }
+        scoreObserver.observe(score);
+    });
 });
 
 // Add ripple effect to buttons
