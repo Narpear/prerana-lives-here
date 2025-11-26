@@ -365,7 +365,7 @@ document.addEventListener('keydown', function(e) {
         
         // Show a fun message
         const message = document.createElement('div');
-        message.textContent = '🎉 You found the secret! More leaves! 🍃';
+        message.textContent = 'You found the secret! More leaves!';
         message.style.position = 'fixed';
         message.style.top = '50%';
         message.style.left = '50%';
@@ -389,6 +389,6 @@ document.addEventListener('keydown', function(e) {
 });
 
 // Log a welcome message
-console.log('%c👋 Welcome to Prerana Kulkarni\'s Portfolio!', 'color: #C17B5C; font-size: 20px; font-weight: bold;');
+console.log('%cWelcome to Prerana Kulkarni\'s Portfolio!', 'color: #C17B5C; font-size: 20px; font-weight: bold;');
 console.log('%cInterested in the code? Check out the source on GitHub!', 'color: #8B7355; font-size: 14px;');
-console.log('%c🍃 Try the Konami code for a surprise! (↑↑↓↓←→←→BA)', 'color: #A8B49A; font-size: 12px; font-style: italic;');
+console.log('%cTry the Konami code for a surprise! (↑↑↓↓←→←→BA)', 'color: #A8B49A; font-size: 12px; font-style: italic;');

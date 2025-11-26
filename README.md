@@ -78,7 +78,7 @@ Your website will be live at: `https://your-username.github.io`
 
 It may take a few minutes for GitHub to build and deploy your site. Once ready, your portfolio will be accessible to anyone with the link!
 
-## 🎨 Customization
+## Customization
 
 ### Updating Content
 
@@ -199,8 +199,8 @@ This project is open source and available for personal use.
 
 ---
 
-Built with ❤️ and a passion for accessible AI
+Built with a passion for accessible AI
 
 **Portfolio URL**: https://your-username.github.io
 
-🍃 Don't forget to try the Konami code easter egg!
+Don't forget to try the Konami code easter egg!
